@@ -90,11 +90,5 @@ def create_app():
     
     return app
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = create_app()
-    print('🎭 Starting Theater Server...')
-    print('📱 WhatsApp Integration: Enabled')
-    print('🔗 Server URL: http://localhost:5000')
-    print('🎯 Admin Dashboard: http://localhost:5000/admin/dashboard')
-    print('')
-    app.run(debug=True, host='0.0.0.0', port=5000)
