@@ -1,25 +1,25 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Import db from models (single instance only)
+# Import db + models
 from models import db, Admin, Seat, SeatStatus, SeatCategory, Booking
 
 login_manager = LoginManager()
+
 
 def create_app():
     app = Flask(__name__)
 
     # ======================
-    # Flask Configuration
+    # Config
     # ======================
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
-    # Database (PostgreSQL on Railway or SQLite locally)
     if os.environ.get('DATABASE_URL'):
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://")
     else:
@@ -28,7 +28,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # ======================
-    # Initialize Extensions
+    # Init Extensions
     # ======================
     db.init_app(app)
     login_manager.init_app(app)
@@ -36,7 +36,7 @@ def create_app():
 
 
     # ======================
-    # User Loader
+    # Login Loader
     # ======================
     @login_manager.user_loader
     def load_user(user_id):
@@ -44,7 +44,7 @@ def create_app():
 
 
     # ======================
-    # Register Blueprints
+    # Blueprints
     # ======================
     with app.app_context():
         from routes.main import main_bp
@@ -57,7 +57,7 @@ def create_app():
 
 
     # ======================
-    # Home Route
+    # Routes
     # ======================
     @app.route("/")
     def home():
@@ -70,23 +70,34 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-        try:
-            if not Admin.query.filter_by(email="vipwinni@shubra.com").first():
-                admin = Admin(email='vipwinni@shubra.com')
-                admin.set_password('vipwinni123@')
-                db.session.add(admin)
-                db.session.commit()
-                print("✔ Default admin created")
-            else:
-                print("✔ Admin already exists")
-        except Exception as e:
-            print(f"⚠ Failed to create admin: {e}")
+        if not Admin.query.filter_by(email="vipwinni@shubra.com").first():
+            admin = Admin(email='vipwinni@shubra.com')
+            admin.set_password('vipwinni123@')
+            db.session.add(admin)
+            db.session.commit()
+            print("✔ Default admin created")
+        else:
+            print("✔ Admin already exists")
+
+
+    # ======================
+    # TEMP INIT SEATS ROUTE ⚠️
+    # ======================
+    @app.route('/init-seats')
+    def init_seats_route():
+        secret = request.args.get("secret")
+        if secret != "vipinit2024":
+            return "Unauthorized", 403
+
+        from init_db import initialize_seats
+        initialize_seats()
+        return "Seats initialized successfully!"
 
 
     return app
 
 
-# IMPORTANT FOR RAILWAY (Gunicorn)
+# For Gunicorn
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True, host="0.0.0.0", port=5000)
