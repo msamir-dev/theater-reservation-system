@@ -1,0 +1,17 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "gunicorn app:app",
+    "healthcheckPath": "/"
+  },
+  "service": {
+    "ports": [
+      {
+        "port": 8080,
+        "protocol": "http"
+      }
+    ]
+  }
+}
