@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز تذاكر المسرح - المقاعد المتاحة</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- الهيدر -->
+        <div class="header">
+            <h1>🎭 مسرحية غنوة تيتا - نظام حجز التذاكر</h1>
+            <p>اختر مقعدك المفضل واحجز تذكرتك بسهولة وأمان</p>
+        </div>
+
+        <!-- خريطة المقاعد -->
+        <div class="seating-map">
+            <div class="stage">الخشبة - STAGE</div>
+            
+            <div class="seating-area">
+                <div class="seating-section" id="left-section">
+                    <!-- سيتم ملء هذا القسم بالمقاعد اليسرى بواسطة JavaScript -->
+                </div>
+                
+                <div class="seating-section" id="right-section">
+                    <!-- سيتم ملء هذا القسم بالمقاعد اليمنى بواسطة JavaScript -->
+                </div>
+            </div>
+            
+            <!-- مفتاح التفسير -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-seat seat available"></div>
+                    <span>متاح</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-seat seat reserved"></div>
+                    <span>محجوز (قيد المراجعة)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-seat seat booked"></div>
+                    <span>مباع</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-seat seat available vip"></div>
+                    <span>VIP متاح</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- نموذج الحجز -->
+        <div class="booking-form" id="booking-form">
+            <h3>نموذج حجز المقاعد</h3>
+            <div id="selected-seats" class="selected-seats-info"></div>
+            
+            <form id="booking-form-element">
+                <div class="form-group">
+                    <label for="customer-name">الاسم الكامل:</label>
+                    <input type="text" id="customer-name" name="customer_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="customer-phone">رقم الواتساب:</label>
+                    <input type="tel" id="customer-phone" name="customer_phone" required 
+                           placeholder="010XXXXXXXX" pattern="01[0125][0-9]{8}" title="يرجى إدخال رقم مصري صحيح (مثال: 01020158805)">
+                </div>
+                
+                <button type="submit" class="btn btn-success">إرسال طلب الحجز</button>
+                <button type="button" class="btn btn-danger" onclick="cancelBooking()">إلغاء</button>
+            </form>
+        </div>
+
+        <!-- رابط تسجيل دخول المدير -->
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/admin/login" class="btn">تسجيل دخول المدير</a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // دالة إلغاء الحجز
+        function cancelBooking() {
+            selectedSeats = [];
+            document.getElementById('booking-form').style.display = 'none';
+            loadSeats(); // إعادة تحميل المقاعد لإزالة التحديد
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - نظام حجز المسرح</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .admin-header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-width: 80px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .booking-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .booking-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+            font-size: 12px;
+        }
+        
+        .detail-value {
+            color: #666;
+        }
+        
+        .booking-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .btn-small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            margin: 0.25rem;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .seats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .seat-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .seat-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        .status-available { background: #d4edda; color: #155724; }
+        .status-reserved { background: #fff3cd; color: #856404; }
+        .status-booked { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- رأس الصفحة الإدارية -->
+        <div class="admin-header">
+            <div class="admin-info">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="شعار المسرح" class="logo" style="max-width: 80px;">
+                <div>
+                    <h2>لوحة التحكم الإدارية</h2>
+                    <p>مرحباً، {{ current_user.email }}</p>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.total }}</div>
+                    <div class="stat-label">إجمالي المقاعد</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.available }}</div>
+                    <div class="stat-label">متاحة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.reserved }}</div>
+                    <div class="stat-label">محجوزة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.booked }}</div>
+                    <div class="stat-label">مباعة</div>
+                </div>
+            </div>
+            
+            <div>
+                <a href="{{ url_for('main.index') }}" class="btn">عرض الموقع</a>
+                <a href="{{ url_for('admin.logout') }}" class="btn btn-danger">تسجيل الخروج</a>
+            </div>
+        </div>
+
+        <!-- علامات التبويب -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('bookings')">طلبات الحجز</button>
+            <button class="tab" onclick="showTab('seats')">جميع المقاعد</button>
+        </div>
+
+        <!-- طلبات الحجز -->
+        <div id="bookings-tab" class="tab-content">
+            {% if pending_bookings %}
+                <h3>طلبات الحجز المعلقة ({{ pending_bookings|length }})</h3>
+                {% for booking in pending_bookings %}
+                    <div class="booking-item">
+                        <div class="booking-header">
+                            <h4>طلب حجز #{{ booking.id }}</h4>
+                            <span class="badge badge-warning">قيد الانتظار</span>
+                        </div>
+                        <div class="booking-details">
+                            <div class="detail-item">
+                                <span class="detail-label">الاسم</span>
+                                <span class="detail-value">{{ booking.customer_name }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">رقم الواتساب</span>
+                                <span class="detail-value">{{ booking.customer_phone }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">المقعد</span>
+                                <span class="detail-value">{{ booking.seat.side }} - صف {{ booking.seat.row_number }} - مقعد {{ booking.seat.seat_number }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">وقت الطلب</span>
+                                <span class="detail-value">{{ booking.booking_time.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </div>
+                        </div>
+                        <div class="booking-actions">
+                            <button class="btn btn-success btn-small" onclick="confirmBooking('{{ booking.id }}')">تأكيد الحجز</button>
+                            <button class="btn btn-danger btn-small" onclick="rejectBooking('{{ booking.id }}')">رفض الحجز</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    لا توجد طلبات حجز معلقة حالياً.
+                </div>
+            {% endif %}
+
+            <!-- الحجوزات المؤكدة -->
+            {% if confirmed_bookings %}
+                <h3 style="margin-top: 30px;">الحجوزات المؤكدة ({{ confirmed_bookings|length }})</h3>
+                {% for booking in confirmed_bookings %}
+                    <div class="booking-item">
+                        <div class="booking-header">
+                            <h4>حجز مؤكد #{{ booking.id }}</h4>
+                            <span class="badge badge-success">مؤكد</span>
+                        </div>
+                        <div class="booking-details">
+                            <div class="detail-item">
+                                <span class="detail-label">الاسم</span>
+                                <span class="detail-value">{{ booking.customer_name }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">رقم الواتساب</span>
+                                <span class="detail-value">{{ booking.customer_phone }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">المقعد</span>
+                                <span class="detail-value">{{ booking.seat.side }} - صف {{ booking.seat.row_number }} - مقعد {{ booking.seat.seat_number }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">وقت التأكيد</span>
+                                <span class="detail-value">{{ booking.confirmation_time.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </div>
+                        </div>
+                        <div class="booking-actions">
+                            <button class="btn btn-danger btn-small" onclick="deleteBooking('{{ booking.id }}')">حذف الحجز</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- جميع المقاعد -->
+        <div id="seats-tab" class="tab-content" style="display: none;">
+            <div class="seats-grid">
+                {% for seat in all_seats %}
+                    <div class="seat-item">
+                        <div><strong>{{ seat.side }} - صف {{ seat.row_number }} - مقعد {{ seat.seat_number }}</strong></div>
+                        <div>{{ 'VIP' if seat.category == 'vip' else 'عادي' }}</div>
+                        <div class="seat-status status-{{ seat.status }}">
+                            {% if seat.status == 'available' %}متاح{% elif seat.status == 'reserved' %}محجوز{% else %}مباع{% endif %}
+                        </div>
+                        {% if seat.booking %}
+                            <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                                {{ seat.booking.customer_name }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // إخفاء جميع علامات التبويب
+            document.getElementById('bookings-tab').style.display = 'none';
+            document.getElementById('seats-tab').style.display = 'none';
+            
+            // إزالة النشاط من جميع الأزرار
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // إظهار العلامة المختارة وتفعيل الزر
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        async function confirmBooking(bookingId) {
+            if (!confirm('هل أنت متأكد من تأكيد هذا الحجز؟')) return;
+            
+            try {
+                const response = await fetch(`/admin/api/confirm-booking/${bookingId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('تم تأكيد الحجز بنجاح! سيتم إرسال رمز QR إلى العميل.');
+                    location.reload();
+                } else {
+                    alert('حدث خطأ: ' + data.message);
+                }
+            } catch (error) {
+                alert('حدث خطأ في الاتصال');
+            }
+        }
+
+        async function rejectBooking(bookingId) {
+            if (!confirm('هل أنت متأكد من رفض هذا الحجز؟')) return;
+            
+            try {
+                const response = await fetch(`/admin/api/reject-booking/${bookingId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('تم رفض الحجز بنجاح.');
+                    location.reload();
+                } else {
+                    alert('حدث خطأ: ' + data.message);
+                }
+            } catch (error) {
+                alert('حدث خطأ في الاتصال');
+            }
+        }
+
+        async function deleteBooking(bookingId) {
+            if (!confirm('هل أنت متأكد من حذف هذا الحجز المؤكد؟\n\nسيتم:\n- حذف الحجز نهائياً\n- إعادة المقعد للحالة المتاحة\n- حذف تذكرة QR')) return;
+            
+            try {
+                const response = await fetch(`/admin/api/delete-booking/${bookingId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('تم حذف الحجز بنجاح! تم إعادة المقعد للحالة المتاحة.');
+                    location.reload();
+                } else {
+                    alert('حدث خطأ: ' + data.message);
+                }
+            } catch (error) {
+                alert('حدث خطأ في الاتصال');
+            }
+        }
+    </script>
+</body>
+</html>

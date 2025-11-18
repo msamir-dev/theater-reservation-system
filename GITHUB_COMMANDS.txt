@@ -1,0 +1,124 @@
+# GitHub Upload Commands for Theater Reservation System
+# Repository Name: theater-reservation-system
+
+## Step 1: Run on Your Local Machine (with Git installed)
+
+### Option A: Automated Scripts
+```cmd
+# For Command Prompt:
+cd "c:\Users\lenovo\Desktop\المسرحية"
+UPLOAD_TO_GITHUB.bat
+
+# For PowerShell:
+cd "c:\Users\lenovo\Desktop\المسرحية"
+.\UPLOAD_TO_GITHUB.ps1
+```
+
+### Option B: Manual Commands (Copy and Paste)
+```bash
+# Navigate to project folder
+cd "c:\Users\lenovo\Desktop\المسرحية"
+
+# Initialize Git repository
+git init
+
+# Add all files (respects .gitignore)
+git add .
+
+# Create initial commit
+git commit -m "Initial production deployment"
+
+# Create GitHub repository (if GitHub CLI is installed)
+gh repo create theater-reservation-system --public --description "Theater reservation system with WhatsApp integration" --source=. --remote=origin --push
+
+# If GitHub CLI is not installed, create repo manually at:
+# https://github.com/new
+# Then run:
+git remote add origin https://github.com/YOUR_USERNAME/theater-reservation-system.git
+git push -u origin main
+```
+
+## Step 2: Authentication (if needed)
+
+### GitHub CLI Authentication
+```bash
+# If prompted for authentication:
+gh auth login
+# Follow the browser prompt to authenticate
+```
+
+### Git Authentication (alternative)
+```bash
+# Set up credentials (if needed)
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# When pushing, use personal access token as password
+# Generate at: https://github.com/settings/tokens
+```
+
+## Step 3: Verify Upload
+
+### Check Repository
+- Visit: https://github.com/YOUR_USERNAME/theater-reservation-system
+- You should see all your files uploaded
+
+### Test Local Repository
+```bash
+# Check git status
+git status
+
+# View commit history
+git log --oneline
+
+# Check remote configuration
+git remote -v
+```
+
+## Files Included in Repository
+✅ app.py - Main Flask application
+✅ config.py - Configuration settings
+✅ requirements.txt - Python dependencies
+✅ routes/ - API and admin routes
+✅ models/ - Database models
+✅ templates/ - HTML templates
+✅ static/ - CSS, JavaScript, images
+✅ init_db.py - Database initialization
+✅ README.md - Project documentation
+✅ .gitignore - Git ignore rules
+✅ All batch and PowerShell scripts
+
+## Files Excluded (.gitignore)
+❌ venv/ - Virtual environment
+❌ __pycache__/ - Python cache files
+❌ *.db - Database files
+❌ .env - Environment variables
+❌ static/temp_qr/ - Temporary QR codes
+
+## Repository URL
+After successful upload, your repository will be at:
+https://github.com/YOUR_USERNAME/theater-reservation-system
+
+## Next Steps After Upload
+1. Share the repository URL
+2. Set up deployment (Heroku, PythonAnywhere, etc.)
+3. Configure production environment variables
+4. Set up production database
+5. Configure WhatsApp Business API
+
+## Troubleshooting
+- If GitHub CLI fails: Create repository manually at github.com/new
+- If authentication fails: Use personal access token
+- If push fails: Check remote URL and credentials
+- If files missing: Check .gitignore rules
+
+## Support
+If you encounter issues, run these diagnostic commands:
+```bash
+git status
+git remote -v
+git log --oneline
+gh auth status
+```
+
+Ready to upload! 🚀

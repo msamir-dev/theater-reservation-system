@@ -1,0 +1,54 @@
+# قاعدة البيانات
+*.db
+*.sqlite
+*.sqlite3
+
+# الملفات المؤقتة
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# بيئة التطوير
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Exclude specific directories and files as requested
+venv/
+__pycache__/
+.env
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ملفات QR Code المؤقتة
+static/temp_qr/*.png
+
+# ملفات السجلات
+*.log

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل دخول المدير - مسرح المدينة</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .login-form button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .login-form button:hover {
+            background: #0056b3;
+        }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>مسرح المدينة</h1>
+            </div>
+            <h2>تسجيل دخول المدير</h2>
+        </div>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <form class="login-form" method="POST">
+                <input type="email" name="email" placeholder="البريد الإلكتروني" required>
+                <input type="password" name="password" placeholder="كلمة المرور" required>
+                <button type="submit">تسجيل الدخول</button>
+            </form>
+            <a href="{{ url_for('main.index') }}" class="back-link">العودة إلى الصفحة الرئيسية</a>
+        </div>
+    </main>
+</body>
+</html>

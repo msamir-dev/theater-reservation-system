@@ -1,0 +1,566 @@
+/* 🎭 تصميم مسرحي حديث وقوي */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Tajawal', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #16213e 100%);
+    min-height: 100vh;
+    direction: rtl;
+    color: #ffffff;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 🎭 تنسيق الهيدر - تصميم مسرحي قوي */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd23f 100%);
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow: 0 20px 40px rgba(255, 107, 53, 0.3);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.header h1 {
+    color: #ffffff;
+    font-size: 3.5em;
+    margin-bottom: 15px;
+    font-weight: 900;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+}
+
+.header p {
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 600;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+}
+
+/* 🎭 تنسيق خريطة المقاعد - تصميم مسرحي قوي */
+.seating-map {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 30px;
+    padding: 40px;
+    margin-bottom: 30px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 107, 53, 0.3);
+}
+
+.stage {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd23f 100%);
+    color: #0f0f23;
+    text-align: center;
+    padding: 35px;
+    margin-bottom: 40px;
+    border-radius: 25px;
+    font-size: 2.2em;
+    font-weight: 900;
+    box-shadow: 0 15px 35px rgba(255, 107, 53, 0.5);
+    text-shadow: 2px 2px 4px rgba(255,255,255,0.3);
+    letter-spacing: 3px;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.stage::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: stageGlow 3s infinite;
+}
+
+@keyframes stageGlow {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.seating-area {
+    display: flex;
+    justify-content: space-around;
+    gap: 40px;
+    margin-bottom: 20px;
+}
+
+.seating-section {
+    flex: 1;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #333;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 5px;
+}
+
+.row-label {
+    width: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: #666;
+    margin-left: 10px;
+}
+
+.seat {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+    backdrop-filter: blur(5px);
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.seat:hover {
+    transform: scale(1.15) translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.seat.available {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: #0f0f23;
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.6);
+    border: 2px solid rgba(0, 255, 136, 0.5);
+}
+
+.seat.reserved {
+    background: linear-gradient(135deg, #ffaa00, #ff8800);
+    color: #0f0f23;
+    cursor: not-allowed;
+    box-shadow: 0 4px 15px rgba(255, 170, 0, 0.6);
+    border: 2px solid rgba(255, 170, 0, 0.5);
+}
+
+.seat.booked {
+    background: linear-gradient(135deg, #ff3366, #ff1144);
+    color: #ffffff;
+    cursor: not-allowed;
+    box-shadow: 0 4px 15px rgba(255, 51, 102, 0.6);
+    border: 2px solid rgba(255, 51, 102, 0.5);
+}
+
+.seat.vip {
+    border-color: #ffd700;
+    border-width: 4px;
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    animation: vipPulse 2s infinite;
+    color: #0f0f23;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes vipPulse {
+    0%, 100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+    50% { box-shadow: 0 8px 25px rgba(255, 215, 0, 0.8); }
+}
+
+.seat.selected {
+    background: linear-gradient(135deg, #2196F3, #1976D2) !important;
+    transform: scale(1.15) translateY(-3px);
+    box-shadow: 0 0 25px rgba(33, 150, 243, 0.8);
+    border-color: #2196F3;
+    animation: selectedGlow 1s infinite alternate;
+}
+
+@keyframes selectedGlow {
+    from { box-shadow: 0 0 25px rgba(33, 150, 243, 0.8); }
+    to { box-shadow: 0 0 35px rgba(33, 150, 243, 1); }
+}
+
+/* مفتاح التفسير - تصميم عصري */
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+}
+
+.legend-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.legend-seat {
+    width: 25px;
+    height: 25px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+/* 🎭 نموذج الحجز - تصميم مسرحي قوي */
+.booking-form {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    display: none;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 107, 53, 0.3);
+}
+
+.booking-form h3 {
+    color: #ffd700;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 2.2em;
+    font-weight: 900;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #ffd700;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 15px 20px;
+    border: 3px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transition: all 0.4s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd23f 100%);
+    color: #0f0f23;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    margin: 5px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.6s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(255, 107, 53, 0.6);
+}
+
+.btn:active {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn:disabled {
+    background: linear-gradient(135deg, #666, #555);
+    cursor: not-allowed;
+    transform: none;
+    color: #999;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #00ff88, #00cc6a, #00aa55);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+    color: #0f0f23;
+}
+
+.btn-success:hover {
+    box-shadow: 0 20px 40px rgba(0, 255, 136, 0.6);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff3366, #ff1144, #cc0033);
+    box-shadow: 0 8px 25px rgba(255, 51, 102, 0.4);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    box-shadow: 0 20px 40px rgba(255, 51, 102, 0.6);
+}
+
+/* رسائل التنبيه */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* لوحة التحكم الإدارية - تصميم عصري */
+.admin-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 25px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    margin: 30px 0;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.admin-header {
+    background: linear-gradient(135deg, #667eea, #764ba2, #5a4a8c);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: adminHeaderGlow 4s infinite;
+}
+
+@keyframes adminHeaderGlow {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.admin-header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: 800;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.booking-item {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.booking-item:hover {
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.booking-info h4 {
+    margin: 0 0 15px 0;
+    color: #1e3c72;
+    font-size: 1.3em;
+    font-weight: 700;
+}
+
+.booking-info p {
+    margin: 8px 0;
+    color: #495057;
+    font-weight: 500;
+}
+
+.booking-actions {
+    display: flex;
+    gap: 15px;
+}
+
+/* تصميم متجاوب */
+@media (max-width: 768px) {
+    .seating-area {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .legend {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .seat {
+        width: 30px;
+        height: 30px;
+        font-size: 8px;
+    }
+    
+    .header h1 {
+        font-size: 2em;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+}
+
+/* تأثيرات Glassmorphism الإضافية */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* تأثيرات إضافية للأزرار الصغيرة */
+.btn-small {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin: 5px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-small:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* تأثيرات النصوص */
+.text-gradient {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* تأثيرات التحميل */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
