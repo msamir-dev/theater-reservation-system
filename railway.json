@@ -1,17 +1,9 @@
 {
+  "$schema": "https://railway.app/schema.json",
   "build": {
-    "builder": "NIXPACKS"
+    "builder": "nixpacks"
   },
   "deploy": {
-    "startCommand": "gunicorn wsgi:app --bind 0.0.0.0:$PORT",
-    "healthcheckPath": "/"
-  },
-  "service": {
-    "ports": [
-      {
-        "port": 8080,
-        "protocol": "http"
-      }
-    ]
+    "startCommand": "gunicorn wsgi:app --bind 0.0.0.0:$PORT"
   }
 }
