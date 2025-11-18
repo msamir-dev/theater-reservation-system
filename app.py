@@ -34,14 +34,12 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = 'admin.login'
 
-
     # ======================
     # Login Loader
     # ======================
     @login_manager.user_loader
     def load_user(user_id):
         return Admin.query.get(int(user_id))
-
 
     # ======================
     # Blueprints
@@ -55,14 +53,12 @@ def create_app():
         app.register_blueprint(admin_bp, url_prefix="/admin")
         app.register_blueprint(api_bp, url_prefix="/api")
 
-
     # ======================
     # Routes
     # ======================
     @app.route("/")
     def home():
         return render_template("index.html")
-
 
     # ======================
     # Create Tables + Default Admin
@@ -79,7 +75,6 @@ def create_app():
         else:
             print("✔ Admin already exists")
 
-
     # ======================
     # TEMP INIT SEATS ROUTE ⚠️
     # ======================
@@ -93,6 +88,12 @@ def create_app():
         initialize_seats()
         return "Seats initialized successfully!"
 
+    # ======================
+    # Debug seat count
+    # ======================
+    @app.route('/debug/count-seats')
+    def debug_count_seats():
+        return str(Seat.query.count())
 
     return app
 
