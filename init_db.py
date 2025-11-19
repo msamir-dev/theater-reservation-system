@@ -1,54 +1,50 @@
+# init_db.py
 from app import create_app
 from models import db, Seat, SeatCategory, SeatStatus, Admin
 from werkzeug.security import generate_password_hash
 
 def initialize_seats():
-    """تهيئة المقاعد في قاعدة البيانات"""
+    """Initialize seats using the same Flask app & DB config as the running app."""
     app = create_app()
-    
+
     with app.app_context():
-        
-        # إنشاء الجداول
+        # Ensure tables exist
         db.create_all()
 
-        # إنشاء حساب المدير الافتراضي
-        if not Admin.query.first():
+        # Create default admin if not exists
+        if not Admin.query.filter_by(email="vipwinni@shubra.com").first():
             admin = Admin(email='vipwinni@shubra.com')
-            admin.password_hash = generate_password_hash('vipwinni123@')
+            admin.set_password('vipwinni123@')
             db.session.add(admin)
-            print("✅ تم إنشاء حساب المدير")
+            db.session.commit()
+            print("✅ Default admin created")
         else:
-            print("⚠️ حساب المدير موجود بالفعل")
+            print("✅ Admin already exists")
 
-        # مسح المقاعد القديمة
+        # Remove existing seats (optional - reinitialize)
         Seat.query.delete()
         db.session.commit()
 
-        seats = []
-        
-        # 11 صف × 6 يمين × 6 شمال = 132 مقعد
-        for side in ['right', 'left']:
-            for row in range(1, 12):
-                for seat_num in range(1, 7):
-
-                    category = (
-                        SeatCategory.VIP if row == 1 else SeatCategory.REGULAR
+        # Create seats: 11 rows, each side (left/right) with 6 seats -> total 11*2*6 = 132
+        created = 0
+        for row in range(1, 12):        # rows 1..11
+            for side in ['right', 'left']:
+                for seat_num in range(1, 7):    # 1..6
+                    category = SeatCategory.VIP if row == 1 else SeatCategory.REGULAR
+                    s = Seat(
+                        row_number=row,
+                        seat_number=seat_num,
+                        side=side,
+                        category=category,
+                        status=SeatStatus.AVAILABLE
                     )
+                    db.session.add(s)
+                    created += 1
 
-                    seats.append(
-                        Seat(
-                            row_number=row,
-                            seat_number=seat_num,
-                            side=side,
-                            category=category,
-                            status=SeatStatus.AVAILABLE
-                        )
-                    )
-
-        db.session.bulk_save_objects(seats)
         db.session.commit()
+        print(f"✅ Created {created} seats (should be 132)")
+        # show count
+        print("DB seat count:", Seat.query.count())
 
-        print(f"🎉 تم إنشاء {len(seats)} مقعد بنجاح!")
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     initialize_seats()
