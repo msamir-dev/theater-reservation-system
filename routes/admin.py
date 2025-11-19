@@ -4,6 +4,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 import os
 import uuid
+import base64
+
 
 try:
     from whatsapp_production import send_whatsapp_notification
