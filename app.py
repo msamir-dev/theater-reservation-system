@@ -1,119 +1,50 @@
-import os
-from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
-from dotenv import load_dotenv
+# init_db.py
+from app import create_app
+from models import db, Seat, SeatCategory, SeatStatus, Admin
+from werkzeug.security import generate_password_hash
 
-load_dotenv()
+def initialize_seats():
+    """Initialize seats using the same Flask app & DB config as the running app."""
+    app = create_app()
 
-# ----- DEBUG ROUTE (Always Works – لا يسبب أي لخبطة) -----
-temp_debug_app = Flask("debug_app")
-
-@temp_debug_app.route("/debug/env")
-def debug_env_route():
-    return "<pre>" + str(dict(os.environ)) + "</pre>"
-# -------------------------------------------------------
-
-
-# Import db + models
-from models import db, Admin, Seat, SeatStatus, SeatCategory, Booking
-
-login_manager = LoginManager()
-
-
-def create_app():
-    app = Flask(__name__)
-
-    # ======================
-    # Config
-    # ======================
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
-
-    if os.environ.get('DATABASE_URL'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://")
-    else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///theater.db"
-
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-    # ======================
-    # Init Extensions
-    # ======================
-    db.init_app(app)
-    login_manager.init_app(app)
-    login_manager.login_view = 'admin.login'
-
-    # ======================
-    # Login Loader
-    # ======================
-    @login_manager.user_loader
-    def load_user(user_id):
-        return Admin.query.get(int(user_id))
-
-    # ======================
-    # Blueprints
-    # ======================
     with app.app_context():
-        from routes.main import main_bp
-        from routes.admin import admin_bp
-        from routes.api import api_bp
-
-        app.register_blueprint(main_bp)
-        app.register_blueprint(admin_bp, url_prefix="/admin")
-        app.register_blueprint(api_bp, url_prefix="/api")
-
-    # ======================
-    # Routes
-    # ======================
-    @app.route("/")
-    def home():
-        return render_template("index.html")
-
-    # ======================
-    # Create Tables + Default Admin
-    # ======================
-    with app.app_context():
+        # Ensure tables exist
         db.create_all()
 
+        # Create default admin if not exists
         if not Admin.query.filter_by(email="vipwinni@shubra.com").first():
             admin = Admin(email='vipwinni@shubra.com')
             admin.set_password('vipwinni123@')
             db.session.add(admin)
             db.session.commit()
-            print("✔ Default admin created")
+            print("✅ Default admin created")
         else:
-            print("✔ Admin already exists")
+            print("✅ Admin already exists")
 
-    # ======================
-    # TEMP INIT SEATS ROUTE ⚠️
-    # ======================
-    @app.route('/init-seats')
-    def init_seats_route():
-        secret = request.args.get("secret")
-        if secret != "vipinit2024":
-            return "Unauthorized", 403
+        # Remove existing seats (optional - reinitialize)
+        Seat.query.delete()
+        db.session.commit()
 
-        from init_db import initialize_seats
-        initialize_seats()
-        return "Seats initialized successfully!"
+        # Create seats: 11 rows, each side (left/right) with 6 seats -> total 11*2*6 = 132
+        created = 0
+        for row in range(1, 12):        # rows 1..11
+            for side in ['right', 'left']:
+                for seat_num in range(1, 7):    # 1..6
+                    category = SeatCategory.VIP if row == 1 else SeatCategory.REGULAR
+                    s = Seat(
+                        row_number=row,
+                        seat_number=seat_num,
+                        side=side,
+                        category=category,
+                        status=SeatStatus.AVAILABLE
+                    )
+                    db.session.add(s)
+                    created += 1
 
-    # ======================
-    # Debug seat count
-    # ======================
-    @app.route('/debug/count-seats')
-    def debug_count_seats():
-        return str(Seat.query.count())
+        db.session.commit()
+        print(f"✅ Created {created} seats (should be 132)")
+        # show count
+        print("DB seat count:", Seat.query.count())
 
-    return app
-
-
-# ----------------------------------------
-#   GUNICORN ENTRY POINT  (IMPORTANT)
-# ----------------------------------------
 if __name__ == "__main__":
-    real_app = create_app()
-
-    # لو حصل خطأ في real_app – Railway هيستخدم debug app
-    app = real_app if real_app else temp_debug_app
-
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    initialize_seats()
