@@ -6,6 +6,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+# ----- DEBUG ROUTE (Always Works) -----
+temp_debug_app = Flask(__name__)
+
+@temp_debug_app.route("/debug/env")
+def debug_env():
+    import os
+    return "<pre>" + str(dict(os.environ)) + "</pre>"
+# --------------------------------------
+
+
 # Import db + models
 from models import db, Admin, Seat, SeatStatus, SeatCategory, Booking
 
