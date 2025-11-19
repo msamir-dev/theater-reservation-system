@@ -119,5 +119,5 @@ def create_app():
 
 # For Gunicorn
 if __name__ == "__main__":
-    app = create_app()
+    app = create_app() or temp_debug_app
     app.run(debug=True, host="0.0.0.0", port=5000)
