@@ -97,7 +97,7 @@ def confirm_booking(booking_id):
             if WHATSAPP_AVAILABLE:
                 # إرسال رقم الهاتف أولاً، ثم المسار، ثم الأوبجكت
                 print(f"[INFO] Attempting to send WhatsApp to {booking.customer_phone}...")
-                success = send_whatsapp_notification(booking.customer_phone, qr_code_path, booking=booking)
+                success = send_whatsapp_notification(booking, qr_code_path)
                 
                 if success:
                     print(f"[SUCCESS] WhatsApp sent to {booking.customer_phone}")
