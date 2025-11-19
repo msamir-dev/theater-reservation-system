@@ -1,12 +1,12 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from models import db, Admin
+from models import db, Admin, Seat
 
 login_manager = LoginManager()
 
@@ -57,5 +57,24 @@ def create_app():
     @app.route("/")
     def home():
         return render_template("index.html")
+
+    # ---------------------------------------------------
+    # 🔥 TEMP ROUTES (INIT SEATS + DEBUG) داخل create_app
+    # ---------------------------------------------------
+
+    from init_db import initialize_seats
+
+    @app.route('/init-seats')
+    def init_seats_route():
+        secret = request.args.get("secret")
+        if secret != "vipinit2024":
+            return "Unauthorized", 403
+
+        initialize_seats(app)
+        return "Seats initialized successfully!"
+
+    @app.route('/debug/count-seats')
+    def debug_count_seats():
+        return str(Seat.query.count())
 
     return app
