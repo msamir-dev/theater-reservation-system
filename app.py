@@ -1,50 +1,44 @@
-# init_db.py
-from app import create_app
-from models import db, Seat, SeatCategory, SeatStatus, Admin
-from werkzeug.security import generate_password_hash
+import os
+from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from dotenv import load_dotenv
 
-def initialize_seats():
-    """Initialize seats using the same Flask app & DB config as the running app."""
-    app = create_app()
+load_dotenv()
+
+from models import db, Admin, Seat, SeatStatus, SeatCategory, Booking
+
+login_manager = LoginManager()
+
+def create_app():
+    app = Flask(__name__)
+
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret')
+    
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url:
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_url.replace("postgres://", "postgresql://")
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///theater.db"
+
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    db.init_app(app)
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(uid):
+        return Admin.query.get(int(uid))
 
     with app.app_context():
-        # Ensure tables exist
+        from routes.main import main_bp
+        from routes.admin import admin_bp
+        from routes.api import api_bp
+        
+        app.register_blueprint(main_bp)
+        app.register_blueprint(admin_bp, url_prefix="/admin")
+        app.register_blueprint(api_bp, url_prefix="/api")
+
         db.create_all()
 
-        # Create default admin if not exists
-        if not Admin.query.filter_by(email="vipwinni@shubra.com").first():
-            admin = Admin(email='vipwinni@shubra.com')
-            admin.set_password('vipwinni123@')
-            db.session.add(admin)
-            db.session.commit()
-            print("✅ Default admin created")
-        else:
-            print("✅ Admin already exists")
-
-        # Remove existing seats (optional - reinitialize)
-        Seat.query.delete()
-        db.session.commit()
-
-        # Create seats: 11 rows, each side (left/right) with 6 seats -> total 11*2*6 = 132
-        created = 0
-        for row in range(1, 12):        # rows 1..11
-            for side in ['right', 'left']:
-                for seat_num in range(1, 7):    # 1..6
-                    category = SeatCategory.VIP if row == 1 else SeatCategory.REGULAR
-                    s = Seat(
-                        row_number=row,
-                        seat_number=seat_num,
-                        side=side,
-                        category=category,
-                        status=SeatStatus.AVAILABLE
-                    )
-                    db.session.add(s)
-                    created += 1
-
-        db.session.commit()
-        print(f"✅ Created {created} seats (should be 132)")
-        # show count
-        print("DB seat count:", Seat.query.count())
-
-if __name__ == "__main__":
-    initialize_seats()
+    return app
