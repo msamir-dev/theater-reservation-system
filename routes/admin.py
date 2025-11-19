@@ -99,7 +99,7 @@ def confirm_booking(booking_id):
         
         # إنشاء رمز QR
         qr_code_path = generate_qr_code(booking)
-        booking.qr_code_path = qr_code_path
+        booking.qr_code_path = os.path.abspath(qr_code_path)
         
         db.session.commit()
         
