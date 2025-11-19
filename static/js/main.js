@@ -32,10 +32,12 @@ function renderSeats() {
     const leftSection = document.getElementById('left-section');
     const rightSection = document.getElementById('right-section');
     
-    const leftSeats = seatsData.filter(seat => seat.side === 'left')
+    const leftSeats = seatsData
+        .filter(seat => seat.side === 'left')
         .sort((a, b) => a.row_number - b.row_number || a.seat_number - b.seat_number);
 
-    const rightSeats = seatsData.filter(seat => seat.side === 'right')
+    const rightSeats = seatsData
+        .filter(seat => seat.side === 'right')
         .sort((a, b) => a.row_number - b.row_number || a.seat_number - b.seat_number);
     
     renderSection(leftSection, leftSeats, 'يسار');
@@ -83,10 +85,12 @@ function createSeatElement(seat) {
     
     seatDiv.textContent = seat.seat_number;
     seatDiv.dataset.seatId = seat.id;
-    seatDiv.title = `مقعد ${seat.side === 'left' ? 'يسار' : 'يمين'} - صف ${seat.row_number} - مقعد ${seat.seat_number} (${seat.category === 'vip' ? 'VIP' : 'عادي'})`;
+    seatDiv.title =
+        `مقعد ${seat.side === 'left' ? 'يسار' : 'يمين'} - صف ${seat.row_number} - مقعد ${seat.seat_number} (${seat.category === 'vip' ? 'VIP' : 'عادي'})`;
     
-    if (seat.status === 'available')
+    if (seat.status === 'available') {
         seatDiv.addEventListener('click', () => toggleSeatSelection(seat));
+    }
     
     return seatDiv;
 }
@@ -137,7 +141,7 @@ function setupEventListeners() {
 async function handleBooking(event) {
     event.preventDefault();
     
-    if (selectedSeats.length === 0)
+    if (!selectedSeats.length)
         return showAlert('يرجى اختيار مقعد واحد على الأقل', 'error');
     
     const customerName = document.getElementById('customer-name').value;
@@ -146,9 +150,9 @@ async function handleBooking(event) {
     if (!customerName || !customerPhone)
         return showAlert('يرجى ملء جميع الحقول', 'error');
     
-    const egyptianPhoneRegex = /^01[0125][0-9]{8}$/;
-    if (!egyptianPhoneRegex.test(customerPhone))
-        return showAlert('يرجى إدخال رقم مصري صحيح (مثال: 01020158805)', 'error');
+    const phoneRegex = /^01[0125][0-9]{8}$/;
+    if (!phoneRegex.test(customerPhone))
+        return showAlert('يرجى إدخال رقم مصري صحيح', 'error');
     
     try {
         const response = await fetch(`${API_BASE}/api/book-seat`, {
@@ -176,7 +180,7 @@ async function handleBooking(event) {
             showAlert(data.message || 'حدث خطأ في الحجز', 'error');
         }
     } catch (error) {
-        console.error('خطأ في الحجز:', error);
+        console.error(error);
         showAlert('حدث خطأ في إرسال الطلب', 'error');
     }
 }
@@ -193,6 +197,7 @@ function showAlert(message, type) {
     setTimeout(() => alertDiv.remove(), 5000);
 }
 
+// تحديث حالة المقعد
 function updateSeatStatus(seatId, status) {
     const seatElement = document.querySelector(`[data-seat-id="${seatId}"]`);
     if (seatElement) {
