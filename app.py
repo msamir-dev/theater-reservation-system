@@ -10,6 +10,7 @@ from models import db, Admin, Seat
 
 login_manager = LoginManager()
 
+
 def create_app():
     app = Flask(__name__)
 
@@ -52,16 +53,15 @@ def create_app():
         db.create_all()
 
     # --------------------
-    # Main Route
+    # HOME
     # --------------------
     @app.route("/")
     def home():
         return render_template("index.html")
 
-    # ---------------------------------------------------
-    # 🔥 TEMP ROUTES (INIT SEATS + DEBUG) داخل create_app
-    # ---------------------------------------------------
-
+    # --------------------
+    # INIT SEATS (WORKS NOW)
+    # --------------------
     from init_db import initialize_seats
 
     @app.route('/init-seats')
@@ -73,6 +73,9 @@ def create_app():
         initialize_seats(app)
         return "Seats initialized successfully!"
 
+    # --------------------
+    # DEBUG COUNT
+    # --------------------
     @app.route('/debug/count-seats')
     def debug_count_seats():
         return str(Seat.query.count())
