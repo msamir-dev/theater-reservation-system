@@ -7,28 +7,14 @@ import uuid
 import base64
 import traceback
 
-# استيراد مكتبات الصور هنا لتفادي تكرار الاستيراد داخل الدوال
+# --- 1. الاستيراد الصحيح والمباشر (تم إزالة الـ try/except المكرر) ---
+# لازم الملف whatsapp_production.py يكون موجود جنبه
+from whatsapp_production import send_whatsapp_notification
+WHATSAPP_AVAILABLE = True
+
+# استيراد مكتبات الصور
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
-
-# --- إعداد خدمة الواتساب ---
-try:
-    from whatsapp_production import send_whatsapp_notification
-    WHATSAPP_AVAILABLE = True
-except ImportError:
-    try:
-        from whatsapp_service_enhanced import send_whatsapp_notification
-        WHATSAPP_AVAILABLE = True
-    except ImportError:
-        try:
-            from whatsapp_service import send_whatsapp_notification
-            WHATSAPP_AVAILABLE = True
-        except ImportError:
-            WHATSAPP_AVAILABLE = False
-            # دالة بديلة بنفس التوقيع (Signature) لمنع الأخطاء
-            def send_whatsapp_notification(phone, qr_code_path, booking=None):
-                print(f"[WARNING] WhatsApp notification skipped - service not available")
-                return False
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -102,21 +88,24 @@ def confirm_booking(booking_id):
         
         # إنشاء رمز QR والحصول على المسار النسبي
         qr_code_path = generate_qr_code(booking)
-        booking.qr_code_path = qr_code_path # تخزين المسار النسبي في قاعدة البيانات
+        booking.qr_code_path = qr_code_path 
         
         db.session.commit()
         
-        # إرسال إشعار واتساب
+        # --- 2. إرسال الواتساب بالاستدعاء الصحيح ---
         try:
             if WHATSAPP_AVAILABLE:
-                # تصحيح: تمرير رقم الهاتف كأول متغير، ثم المسار، ثم الأوبجكت
+                # إرسال رقم الهاتف أولاً، ثم المسار، ثم الأوبجكت
+                print(f"[INFO] Attempting to send WhatsApp to {booking.customer_phone}...")
                 success = send_whatsapp_notification(booking.customer_phone, qr_code_path, booking=booking)
+                
                 if success:
                     print(f"[SUCCESS] WhatsApp sent to {booking.customer_phone}")
                 else:
                     print(f"[WARNING] Failed sending WhatsApp to {booking.customer_phone}")
             else:
-                print("[INFO] WhatsApp service unavailable")
+                print("[INFO] WhatsApp service unavailable flag is False")
+                
         except Exception as e:
             print(f"[ERROR] WhatsApp Exception: {e}")
             traceback.print_exc()
@@ -180,9 +169,9 @@ def reject_booking(booking_id):
         return jsonify({'success': False, 'message': str(e)})
 
 def generate_qr_code(booking):
-    """Generate ticket image. Uses basic ASCII for text to avoid Linux font issues."""
+    """Generate ticket image. ASCII only to avoid Linux font issues."""
     
-    # QR code content
+    # QR content
     qr_data = f"""
     Theater Ticket - Confirmation
     Booking ID: {booking.id}
@@ -207,10 +196,8 @@ def generate_qr_code(booking):
     canvas = Image.new('RGB', (canvas_width, canvas_height), "#F8F9FA")
     draw = ImageDraw.Draw(canvas)
     
-    # محاولة تحميل الخطوط، والعودة للافتراضي عند الفشل
     try:
-        # حاول استخدام خط يدعم العربية إذا كان متوفراً في ملفاتك
-        # font_path = os.path.join('static', 'fonts', 'Cairo-Regular.ttf')
+        # Use basic fonts to ensure compatibility
         title_font = ImageFont.truetype("arial.ttf", 40)
         header_font = ImageFont.truetype("arial.ttf", 28)
         text_font = ImageFont.truetype("arial.ttf", 22)
@@ -221,7 +208,7 @@ def generate_qr_code(booking):
         text_font = ImageFont.load_default()
         small_font = ImageFont.load_default()
     
-    # خلفية متدرجة
+    # Background
     for y in range(canvas_height):
         blue_intensity = int(240 - (y / canvas_height) * 60)
         draw.line([(0, y), (canvas_width, y)], fill=(blue_intensity, blue_intensity, 255))
@@ -229,13 +216,12 @@ def generate_qr_code(booking):
     overlay = Image.new('RGBA', (canvas_width, canvas_height), (255, 255, 255, 40))
     canvas.paste(overlay, (0, 0), overlay)
     
-    # الهيدر
+    # Header
     header_height = 160
     for y in range(header_height):
         blue_intensity = int(44 + (y / header_height) * 30)
         draw.line([(0, y), (canvas_width, y)], fill=(blue_intensity, 62, 80))
     
-    # تم إزالة الإيموجي لمنع الأخطاء
     draw.text((canvas_width//2, 60), "THEATER TICKET", font=title_font, fill="#ECF0F1", anchor="mm")
     draw.text((canvas_width//2, 110), "OFFICIAL CONFIRMATION", font=header_font, fill="#BDC3C7", anchor="mm")
     
@@ -246,12 +232,12 @@ def generate_qr_code(booking):
     info_y_start = 200
     info_height = 280
     
-    # تصحيح: رسم الظل أولاً
+    # Draw Shadow FIRST (Layer Fix)
     shadow_offset = 4
     draw.rectangle([50+shadow_offset, info_y_start+shadow_offset, canvas_width-50+shadow_offset, info_y_start+info_height+shadow_offset], 
-                   fill="#D3D3D3") # لون ظل رمادي
+                   fill="#D3D3D3")
 
-    # ثم رسم الصندوق الأبيض
+    # Draw Box SECOND
     draw.rectangle([50, info_y_start, canvas_width-50, info_y_start+info_height], 
                    fill="#FFFFFF", outline="#3498DB", width=3)
     
@@ -262,9 +248,10 @@ def generate_qr_code(booking):
     details_start_y = info_y_start + 120
     line_height = 45
     
-    # تم إزالة الإيموجي من هنا أيضاً
+    # Safe text drawing (No Emojis)
     draw.text((80, details_start_y), f"Booking ID: #{booking.id}", font=text_font, fill="#2C3E50")
-    # التأكد من أن الاسم لا يحتوي رموز غريبة، أو استخدام دالة لتنظيفه
+    
+    # Sanitize name
     safe_name = booking.customer_name.encode('ascii', 'ignore').decode('ascii')
     draw.text((80, details_start_y + line_height), f"Customer: {safe_name}", font=text_font, fill="#2C3E50")
     draw.text((80, details_start_y + line_height*2), f"Phone: {booking.customer_phone}", font=text_font, fill="#2C3E50")
@@ -281,27 +268,22 @@ def generate_qr_code(booking):
     draw.rectangle([qr_x-25, qr_y-25, qr_x+border_size-25, qr_y+border_size-25], 
                    fill="#FFFFFF", outline="#3498DB", width=4)
     
-    # رسم الزوايا (بدون مشاكل)
+    # Corners
     corner_size = 20
     corner_color = "#E74C3C"
-    # Top-left
     draw.polygon([(qr_x-25, qr_y-25), (qr_x-25+corner_size, qr_y-25), (qr_x-25, qr_y-25+corner_size)], fill=corner_color)
-    # Top-right
     draw.polygon([(qr_x+border_size-25, qr_y-25), (qr_x+border_size-25-corner_size, qr_y-25), (qr_x+border_size-25, qr_y-25+corner_size)], fill=corner_color)
-    # Bottom-left
     draw.polygon([(qr_x-25, qr_y+border_size-25), (qr_x-25+corner_size, qr_y+border_size-25), (qr_x-25, qr_y+border_size-25-corner_size)], fill=corner_color)
-    # Bottom-right
     draw.polygon([(qr_x+border_size-25, qr_y+border_size-25), (qr_x+border_size-25-corner_size, qr_y+border_size-25), (qr_x+border_size-25, qr_y+border_size-25-corner_size)], fill=corner_color)
     
     qr_resized = qr_img.resize((qr_size, qr_size), Image.Resampling.LANCZOS)
     canvas.paste(qr_resized, (qr_x, qr_y))
     
     instructions_y = qr_y + border_size - 25 + 50
-    # إزالة الإيموجي
     draw.text((canvas_width//2, instructions_y), "SCAN QR CODE AT ENTRANCE", font=text_font, fill="#2C3E50", anchor="mm")
     draw.text((canvas_width//2, instructions_y+40), "KEEP THIS TICKET FOR ENTRY", font=text_font, fill="#E74C3C", anchor="mm")
     
-    # النجوم (النجوم عادة مدعومة في ASCII الموسع، لكن إذا سببت مشكلة يمكن استبدالها بـ *)
+    # Stars (ASCII)
     star_color = "#F39C12"
     star_positions = [(120, 120), (canvas_width-120, 120), (180, canvas_height-180), (canvas_width-180, canvas_height-180)]
     for x, y in star_positions:
@@ -317,17 +299,13 @@ def generate_qr_code(booking):
     serial_text = f"SERIAL: {booking.id:06d}"
     draw.text((canvas_width//2, footer_y+65), serial_text, font=small_font, fill="#BDC3C7", anchor="mm")
     
-    # إعداد اسم الملف والمسار
+    # File Saving
     filename = f"ticket_{booking.id}_{uuid.uuid4().hex[:8]}.png"
-    
-    # المسار النسبي لقاعدة البيانات (Web Path)
     relative_path = os.path.join('static', 'temp_qr', filename)
-    
-    # المسار المطلق للحفظ (File System Path)
     full_path = os.path.join(os.getcwd(), relative_path)
     
     os.makedirs(os.path.dirname(full_path), exist_ok=True)
     canvas.save(full_path, 'PNG', quality=100, optimize=True)
     
     print(f"[SUCCESS] Ticket created: {relative_path}")
-    return relative_path # إرجاع المسار النسبي
+    return relative_path
