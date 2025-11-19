@@ -6,15 +6,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-# ----- DEBUG ROUTE (Always Works) -----
-temp_debug_app = Flask(__name__)
+# ----- DEBUG ROUTE (Always Works – لا يسبب أي لخبطة) -----
+temp_debug_app = Flask("debug_app")
 
 @temp_debug_app.route("/debug/env")
-def debug_env():
-    import os
+def debug_env_route():
     return "<pre>" + str(dict(os.environ)) + "</pre>"
-# --------------------------------------
+# -------------------------------------------------------
 
 
 # Import db + models
@@ -106,18 +104,16 @@ def create_app():
     def debug_count_seats():
         return str(Seat.query.count())
 
-    # ======================
-    # Debug ENV VARIABLES ✅
-    # ======================
-    @app.route('/debug/env')
-    def debug_env():
-        import os
-        return "<pre>" + str(dict(os.environ)) + "</pre>"
-
     return app
 
 
-# For Gunicorn
+# ----------------------------------------
+#   GUNICORN ENTRY POINT  (IMPORTANT)
+# ----------------------------------------
 if __name__ == "__main__":
-    app = create_app() or temp_debug_app
+    real_app = create_app()
+
+    # لو حصل خطأ في real_app – Railway هيستخدم debug app
+    app = real_app if real_app else temp_debug_app
+
     app.run(debug=True, host="0.0.0.0", port=5000)
