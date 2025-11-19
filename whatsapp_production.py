@@ -2,6 +2,8 @@ import requests
 import os
 import time
 from datetime import datetime
+import base64
+
 
 def send_whatsapp_notification(booking, qr_code_path=None):
     """ إرسال إشعار واتساب عند تأكيد الحجز """
@@ -142,14 +144,16 @@ def send_whatsapp_notification(booking, qr_code_path=None):
 def send_text_message(phone, message, token, instance):
     """إرسال رسالة النصية"""
     try:
-        # إعداد رسالة التأكيد - نستخدم message اللي جاي من الparameter مباشرة
+        # تأكيد UTF-8
+        message = message.encode('utf-8').decode('utf-8')
+
         if not message:
             message = "🎭 تم تأكيد حجزك بنجاح! برجاء إحضار صورة QR Code عند الحضور."
         
-        # نجهز reference ID
         reference_id = f"theater_booking_{int(datetime.now().timestamp())}"
-        
+
         url = f"https://api.ultramsg.com/{instance}/messages/chat"
+
         payload = {
             "token": token,
             "to": phone,
@@ -157,11 +161,13 @@ def send_text_message(phone, message, token, instance):
             "priority": 10,
             "referenceId": reference_id
         }
-        
-        headers = {'content-type': 'application/x-www-form-urlencoded'}
-        
-        response = requests.post(url, data=payload, headers=headers)
-        
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+        }
+
+        response = requests.post(url, data=payload, headers=headers, timeout=30)
+
         if response.status_code == 200:
             result = response.json()
             if result.get('sent') == 'true':
@@ -173,10 +179,11 @@ def send_text_message(phone, message, token, instance):
         else:
             print(f"⚠️ فشل إرسال الرسالة النصية - رمز الحالة: {response.status_code}")
             return False
-    
+
     except Exception as e:
         print(f"❌ خطأ في إرسال الرسالة النصية: {e}")
         return False
+
 
 def send_image_message(phone, image_path, token, instance):
     """إرسال صورة QR Code مع تصميج احترافي"""
