@@ -38,10 +38,10 @@ def login():
         
         if admin and admin.check_password(password):
             login_user(admin)
-            flash('تم تسجيل الدخول بنجاح!', 'success')
+            request.session = {"msg": "تم تسجيل الدخول بنجاح!", "type": "success"}
             return redirect(url_for('admin.dashboard'))
         else:
-            flash('البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error')
+            request.session = {"msg": "البريد الإلكتروني أو كلمة المرور غير صحيحة", "type": "error"}
     
     return render_template('admin/login.html')
 
@@ -49,7 +49,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash('تم تسجيل الخروج بنجاح', 'success')
+    request.session = {"msg": "تم تسجيل الخروج بنجاح", "type": "success"}
     return redirect(url_for('main.index'))
 
 @admin_bp.route('/dashboard')
