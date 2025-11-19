@@ -95,6 +95,14 @@ def create_app():
     def debug_count_seats():
         return str(Seat.query.count())
 
+    # ======================
+    # Debug ENV VARIABLES ✅
+    # ======================
+    @app.route('/debug/env')
+    def debug_env():
+        import os
+        return "<pre>" + str(dict(os.environ)) + "</pre>"
+
     return app
 
 
